@@ -463,6 +463,29 @@ pub const AddCSourceFilesOptions = struct {
     flags: []const []const u8 = &.{},
 };
 
+/// For use when you want Zig to handle discovering C/C++ source files for you and assign them the same flags
+pub fn discoverCSourceFiles(m: *Module, options: AddCSourceFilesOptions) void {
+    const b = m.owner;
+    const allocator = b.allocator;
+
+    for (options.files) |path| {
+        if (std.fs.path.isAbsolute(path)) {
+            std.debug.panic(
+                "file paths added with 'addCSourceFiles' must be relative, found absolute path '{s}'",
+                .{path},
+            );
+        }
+    }
+
+    const c_source_files = allocator.create(CSourceFiles) catch @panic("OOM");
+    c_source_files.* = .{
+        .root = options.root orelse b.path(""),
+        .files = b.dupeStrings(options.files),
+        .flags = b.dupeStrings(options.flags),
+    };
+    m.link_objects.append(allocator, .{ .c_source_files = c_source_files }) catch @panic("OOM");
+}
+
 /// Handy when you have many C/C++ source files and want them all to have the same flags.
 pub fn addCSourceFiles(m: *Module, options: AddCSourceFilesOptions) void {
     const b = m.owner;

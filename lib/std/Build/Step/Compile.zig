@@ -778,6 +778,11 @@ pub fn linkFrameworkWeak(c: *Compile, name: []const u8) void {
     c.root_module.linkFramework(name, .{ .weak = true });
 }
 
+/// For use when you want Zig to handle discovering C/C++ source files for you and assign them the same flags
+pub fn discoverCSourceFiles(compile: *Compile, options: Module.AddCSourceFilesOptions) void {
+    compile.root_module.discoverCSourceFiles(options);
+}
+
 /// Handy when you have many C/C++ source files and want them all to have the same flags.
 pub fn addCSourceFiles(compile: *Compile, options: Module.AddCSourceFilesOptions) void {
     compile.root_module.addCSourceFiles(options);
